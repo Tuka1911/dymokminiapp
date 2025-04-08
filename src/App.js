@@ -131,12 +131,7 @@ export default function DymokApp() {
     }, [search]);
 
     const generateOrderNumber = useCallback(() => {
-        const date = new Date();
-        const datePart = date.getFullYear().toString().slice(-2) +
-            (date.getMonth() + 1).toString().padStart(2, '0') +
-            date.getDate().toString().padStart(2, '0');
-        const randomPart = Math.floor(1000 + Math.random() * 9000);
-        return `ORD-${datePart}-${randomPart}`;
+        return Math.floor(100000 + Math.random() * 900000); // 6-значный номер
     }, []);
 
     const calculateDeliveryCost = () => {
@@ -190,6 +185,36 @@ export default function DymokApp() {
         ));
     }, [removeFromCart]);
 
+    const generateReceiptContent = (orderNum) => {
+        let receipt = `Заказ #${orderNum}\n`;
+        receipt += `Дата: ${new Date().toLocaleString()}\n\n`;
+        receipt += 'Товары:\n';
+        
+        cart.forEach(item => {
+            receipt += `- ${item.name} (${item.selectedFlavor}) × ${item.quantity || 1} = ${(item.price * (item.quantity || 1)).toLocaleString()}₸\n`;
+        });
+
+        receipt += `\nИтого: ${getTotalPrice().toLocaleString()}₸\n\n`;
+        receipt += `Реквизиты для оплаты:\n`;
+        receipt += `Номер карты: ${paymentDetails.cardNumber}\n\n`;
+        receipt += `После оплаты отправьте менеджеру скриншот чека и номер заказа\n`;
+        receipt += `Ссылка на менеджера: ${managerLink}`;
+
+        return receipt;
+    };
+
+    const downloadReceipt = (content, filename) => {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
     const handleOrderPayment = async () => {
         if (!contactPhone || !deliveryAddress) {
             setSubmitError('Пожалуйста, заполните контактный телефон и адрес доставки');
@@ -203,35 +228,15 @@ export default function DymokApp() {
             const newOrderNumber = generateOrderNumber();
             setOrderNumber(newOrderNumber);
 
-            // Формируем данные заказа
-            const orderData = {
-                orderNumber: newOrderNumber,
-                date: new Date().toLocaleString(),
-                items: cart.map(item => ({
-                    name: `${item.name} (${item.selectedFlavor})`,
-                    quantity: item.quantity || 1,
-                    price: item.price
-                })),
-                subtotal: getTotalPrice(),
-                delivery: deliveryArea === 'outside' ? 'Индивидуальный тариф' : calculateDeliveryCost(),
-                contactPhone,
-                deliveryAddress,
-                checkDevice,
-                promoCode,
-                paymentDetails
-            };
-
-            // В реальном приложении здесь будет отправка на сервер
-            console.log('Отправка заказа:', orderData);
-
-            // Имитация задержки отправки
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // Формируем и скачиваем чек
+            const receiptContent = generateReceiptContent(newOrderNumber);
+            downloadReceipt(receiptContent, `order_${newOrderNumber}.txt`);
 
             setSubmitSuccess(true);
             setShowReceipt(true);
             setPaymentConfirmed(true);
 
-            // Очищаем корзину после успешного оформления
+            // Очищаем корзину
             setCart([]);
             localStorage.removeItem('cart');
 
@@ -246,105 +251,55 @@ export default function DymokApp() {
     const renderReceipt = () => (
         <div className="bg-gray-800 rounded-xl p-5 border border-gray-700 mb-6">
             <div className="flex items-center justify-center mb-4">
-                {submitSuccess ? (
-                    <CheckCircle className="text-green-500 mr-2" size={24} />
-                ) : (
-                    <Loader2 className="animate-spin text-yellow-500 mr-2" size={24} />
-                )}
+                <CheckCircle className="text-green-500 mr-2" size={24} />
                 <h3 className="text-xl font-bold">
-                    {submitSuccess ? `Ваш заказ #${orderNumber} оформлен!` : 'Оформление заказа...'}
+                    Ваш заказ #{orderNumber} оформлен!
                 </h3>
             </div>
 
-            {submitSuccess ? (
-                <>
-                    <div className="mb-6">
-                        <div className="flex justify-between py-2 border-b border-gray-700">
-                            <span className="text-gray-400">Дата:</span>
-                            <span>{new Date().toLocaleString()}</span>
-                        </div>
-
-                        <h4 className="font-medium mt-4 mb-2">Товары:</h4>
-                        {cart.map(item => (
-                            <div key={`${item.id}-${item.selectedFlavor}`} className="flex justify-between py-2">
-                                <span>
-                                    {item.name} ({item.selectedFlavor}) × {item.quantity || 1}
-                                </span>
-                                <span>{(item.price * (item.quantity || 1)).toLocaleString()}₸</span>
-                            </div>
-                        ))}
-
-                        <div className="flex justify-between py-2 border-t border-gray-700 mt-3">
-                            <span>Сумма товаров:</span>
-                            <span>{getTotalPrice().toLocaleString()}₸</span>
-                        </div>
-
-                        <div className="flex justify-between py-2">
-                            <span>Доставка:</span>
-                            <span>
-                                {deliveryArea === 'outside'
-                                    ? 'Индивидуальный тариф (уточнит менеджер)'
-                                    : `${calculateDeliveryCost().toLocaleString()}₸`}
-                            </span>
-                        </div>
-
-                        <div className="mt-6 p-4 bg-yellow-900/20 rounded-lg border border-yellow-800">
-                            <h4 className="font-medium text-yellow-400 mb-2">Важно!</h4>
-                            <p className="text-sm">
-                                Оплатите только стоимость товаров: <strong>{getTotalPrice().toLocaleString()}₸</strong>.
-                                Стоимость доставки уточнит менеджер после получения заказа.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="bg-gray-700/30 p-4 rounded-lg mb-4">
-                        <h4 className="font-medium mb-2">Реквизиты для оплаты:</h4>
-                        <div className="bg-gray-900 p-3 rounded-lg mb-2">
-                            <p className="text-sm text-gray-400 mb-1">Номер карты:</p>
-                            <p className="font-mono text-lg">{paymentDetails.cardNumber}</p>
-                        </div>
-                        <div className="bg-gray-900 p-3 rounded-lg mb-2">
-                            <p className="text-sm text-gray-400 mb-1">Банк:</p>
-                            <p className="font-medium">{paymentDetails.bankName}</p>
-                        </div>
-                        <div className="bg-gray-900 p-3 rounded-lg">
-                            <p className="text-sm text-gray-400 mb-1">Получатель:</p>
-                            <p className="font-medium">{paymentDetails.recipientName}</p>
-                        </div>
-                        <p className="text-sm text-gray-300 mt-3">
-                            В комментарии к платежу укажите: <strong>{orderNumber}</strong>
-                        </p>
-                    </div>
-
-                    <div className="mt-6">
-                        <Button
-                            asChild
-                            className="w-full bg-green-600 hover:bg-green-700 py-4 text-lg font-medium"
-                        >
-                            <a href={`${managerLink}?start=order_${orderNumber}`} target="_blank" rel="noopener noreferrer">
-                                Связаться с менеджером
-                            </a>
-                        </Button>
-                        <p className="text-sm text-gray-400 mt-2 text-center">
-                            После оплаты отправьте менеджеру скриншот чека и номер заказа
-                        </p>
-                    </div>
-                </>
-            ) : submitError ? (
-                <div className="bg-red-900/20 p-4 rounded-lg border border-red-800">
-                    <p className="text-red-400">{submitError}</p>
-                    <Button
-                        className="w-full mt-4"
-                        onClick={handleOrderPayment}
-                    >
-                        Попробовать снова
-                    </Button>
+            <div className="mb-6">
+                <div className="flex justify-between py-2 border-b border-gray-700">
+                    <span className="text-gray-400">Дата:</span>
+                    <span>{new Date().toLocaleString()}</span>
                 </div>
-            ) : (
-                <div className="flex justify-center py-8">
-                    <Loader2 className="animate-spin text-gray-400" size={32} />
+
+                <h4 className="font-medium mt-4 mb-2">Товары:</h4>
+                {cart.map(item => (
+                    <div key={`${item.id}-${item.selectedFlavor}`} className="flex justify-between py-2">
+                        <span>
+                            {item.name} ({item.selectedFlavor}) × {item.quantity || 1}
+                        </span>
+                        <span>{(item.price * (item.quantity || 1)).toLocaleString()}₸</span>
+                    </div>
+                ))}
+
+                <div className="flex justify-between py-2 border-t border-gray-700 mt-3 font-bold">
+                    <span>Сумма:</span>
+                    <span className="text-green-400">{getTotalPrice().toLocaleString()}₸</span>
                 </div>
-            )}
+            </div>
+
+            <div className="bg-gray-700/30 p-4 rounded-lg mb-4">
+                <h4 className="font-medium mb-2">Реквизиты для оплаты:</h4>
+                <div className="bg-gray-900 p-3 rounded-lg">
+                    <p className="text-sm text-gray-400 mb-1">Номер карты:</p>
+                    <p className="font-mono text-lg">{paymentDetails.cardNumber}</p>
+                </div>
+            </div>
+
+            <div className="mt-6">
+                <Button
+                    asChild
+                    className="w-full bg-green-600 hover:bg-green-700 py-4 text-lg font-medium"
+                >
+                    <a href={`${managerLink}?start=order_${orderNumber}`} target="_blank" rel="noopener noreferrer">
+                        Связаться с менеджером
+                    </a>
+                </Button>
+                <p className="text-sm text-gray-400 mt-2 text-center">
+                    После оплаты отправьте менеджеру скриншот чека и номер заказа
+                </p>
+            </div>
         </div>
     );
 
@@ -444,17 +399,9 @@ export default function DymokApp() {
 
                 <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
                     <h4 className="font-medium mb-2">Реквизиты для оплаты:</h4>
-                    <div className="bg-gray-900 p-3 rounded-lg mb-2">
+                    <div className="bg-gray-900 p-3 rounded-lg">
                         <p className="text-sm text-gray-400 mb-1">Номер карты:</p>
                         <p className="font-mono text-lg">{paymentDetails.cardNumber}</p>
-                    </div>
-                    <div className="bg-gray-900 p-3 rounded-lg mb-2">
-                        <p className="text-sm text-gray-400 mb-1">Банк:</p>
-                        <p className="font-medium">{paymentDetails.bankName}</p>
-                    </div>
-                    <div className="bg-gray-900 p-3 rounded-lg">
-                        <p className="text-sm text-gray-400 mb-1">Получатель:</p>
-                        <p className="font-medium">{paymentDetails.recipientName}</p>
                     </div>
                 </div>
 
@@ -477,14 +424,6 @@ export default function DymokApp() {
                     renderReceipt()
                 ) : (
                     <div className="space-y-4">
-                        <div className="bg-yellow-900/20 rounded-xl p-4 border border-yellow-800">
-                            <h4 className="font-medium text-yellow-400 mb-2">Важно!</h4>
-                            <p className="text-sm">
-                                Оплатите только стоимость товаров: <strong>{getTotalPrice().toLocaleString()}₸</strong>.
-                                Стоимость доставки уточнит менеджер после получения заказа.
-                            </p>
-                        </div>
-
                         <Button
                             className="w-full py-4 text-lg font-medium bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
                             onClick={handleOrderPayment}
@@ -581,7 +520,6 @@ export default function DymokApp() {
 
             {showCheckout ? renderCheckout() : renderProductCatalog()}
 
-            {/* Модальное окно выбора вкуса */}
             {selectedProduct && (
                 <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-gray-800 rounded-xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto border border-gray-700 shadow-2xl">
@@ -650,7 +588,6 @@ export default function DymokApp() {
                 </div>
             )}
 
-            {/* Корзина */}
             {showCart && (
                 <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-end justify-center z-50">
                     <div className="bg-gray-800 rounded-t-2xl w-full max-w-2xl max-h-[85vh] flex flex-col border-t border-gray-700 shadow-xl">
@@ -750,7 +687,6 @@ export default function DymokApp() {
                 </div>
             )}
 
-            {/* Плавающая кнопка корзины */}
             {!showCheckout && (
                 <div className="fixed bottom-6 right-6 z-40">
                     <Button
