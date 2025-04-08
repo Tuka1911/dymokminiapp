@@ -166,7 +166,7 @@ export default function DymokApp() {
             {/* Упрощенная шапка для мобильных */}
             <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2">
-                    <img src="https://api.logo.com/api/v2/images?design=lg_ZKr8H3ndN71oZLSd7v&u=ff2fc0ec5b7ab0ac231779e391f9f88ff27ee04daca1d04685988a526c540921&width=128&height=128&margins=24&fit=contain&format=webp&quality=60&tightBounds=true" className="w-8 h-8 rounded-full" alt="logo" />
+                    <img src="https://cdn1.cdn-telegram.org/file/QyqXMkgidt5GVueQgruR5IUjmFOINbW-6AjrChU9MAnIAcksbBPTTZEO4wiNguIgZKcMb6gsBVDHaEYOmkmBkAOtF1fpVfy8F3a7HxWljk0HYF8qtTqQ0MpoOi28gBmeHUZKY6VpOna_KfY4g2I28o8wp1yEcyZQa6lr5gCoebemFm01APH0B9Ohnym1fmJjVR50dvc7mGzum_BZqfcxQBF1KgXC4wEbdaTe2rj-XzHlfMZzOuRhc6Pn2nVnhgGYp0SyZLFK0Iaa-3IsNF1CwREZPgtzFX-vp6HWCZLMWGbzXePJ-ZIiyw_iK1qQ7pzaz9nFrIuDPhbmmOMuoChQ1A.jpg" className="w-8 h-8 rounded-full" alt="logo" />
                     <h1 className="text-lg font-bold">Дымок</h1>
                 </div>
                <Button 
