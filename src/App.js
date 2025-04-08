@@ -191,6 +191,11 @@ export default function DymokApp() {
     }, [removeFromCart]);
 
     const handleOrderPayment = async () => {
+        if (!contactPhone || !deliveryAddress) {
+            setSubmitError('Пожалуйста, заполните контактный телефон и адрес доставки');
+            return;
+        }
+
         setIsSubmitting(true);
         setSubmitError('');
 
@@ -361,13 +366,6 @@ export default function DymokApp() {
                 <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
                     <h3 className="text-lg font-semibold mb-4">Доставка</h3>
                     <div className="space-y-4">
-                        <div className="flex items-center">
-                            <div className="flex-1">
-                                <p className="font-medium">Яндекс доставка</p>
-                                <p className="text-sm text-gray-400">Время доставки: от 60 до 180 минут.</p>
-                            </div>
-                        </div>
-
                         <div className="space-y-3">
                             <h4 className="font-medium">Стоимость доставки:</h4>
                             <div className="flex flex-col gap-2">
@@ -380,8 +378,8 @@ export default function DymokApp() {
                                         className="text-green-500"
                                     />
                                     <div className="flex-1">
-                                        <p>В квадрате Саина – Рыскулова – Восточка – Аль-Фараби</p>
-                                        <p className="text-sm text-gray-400">1500₸</p>
+                                        <p>В квадрате (1500₸)</p>
+                                        <p className="text-sm text-gray-400">Саина – Рыскулова – Восточка – Аль-Фараби</p>
                                     </div>
                                 </label>
                                 <label className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg border border-gray-600">
@@ -393,21 +391,8 @@ export default function DymokApp() {
                                         className="text-green-500"
                                     />
                                     <div className="flex-1">
-                                        <p>В пределах города (за пределами квадрата)</p>
-                                        <p className="text-sm text-gray-400">2500₸</p>
-                                    </div>
-                                </label>
-                                <label className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg border border-gray-600">
-                                    <input
-                                        type="radio"
-                                        name="deliveryArea"
-                                        checked={deliveryArea === 'outside'}
-                                        onChange={() => setDeliveryArea('outside')}
-                                        className="text-green-500"
-                                    />
-                                    <div className="flex-1">
-                                        <p>За город</p>
-                                        <p className="text-sm text-gray-400">Индивидуальный тариф</p>
+                                        <p>В пределах города (2500₸)</p>
+                                        <p className="text-sm text-gray-400">За пределами квадрата, но в черте города</p>
                                     </div>
                                 </label>
                             </div>
@@ -426,12 +411,13 @@ export default function DymokApp() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Адрес доставки</label>
+                                <label className="block text-sm font-medium mb-1">Адрес доставки *</label>
                                 <Input
                                     value={deliveryAddress}
                                     onChange={(e) => setDeliveryAddress(e.target.value)}
-                                    placeholder="Укажите адрес или ссылку на 2Гис"
+                                    placeholder="Укажите точный адрес или ссылку на 2ГИС"
                                     className="w-full bg-gray-700 border-gray-600"
+                                    required
                                 />
                             </div>
                         </div>
@@ -454,6 +440,22 @@ export default function DymokApp() {
                             </p>
                         </div>
                     </label>
+                </div>
+
+                <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
+                    <h4 className="font-medium mb-2">Реквизиты для оплаты:</h4>
+                    <div className="bg-gray-900 p-3 rounded-lg mb-2">
+                        <p className="text-sm text-gray-400 mb-1">Номер карты:</p>
+                        <p className="font-mono text-lg">{paymentDetails.cardNumber}</p>
+                    </div>
+                    <div className="bg-gray-900 p-3 rounded-lg mb-2">
+                        <p className="text-sm text-gray-400 mb-1">Банк:</p>
+                        <p className="font-medium">{paymentDetails.bankName}</p>
+                    </div>
+                    <div className="bg-gray-900 p-3 rounded-lg">
+                        <p className="text-sm text-gray-400 mb-1">Получатель:</p>
+                        <p className="font-medium">{paymentDetails.recipientName}</p>
+                    </div>
                 </div>
 
                 <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
@@ -486,7 +488,7 @@ export default function DymokApp() {
                         <Button
                             className="w-full py-4 text-lg font-medium bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
                             onClick={handleOrderPayment}
-                            disabled={!contactPhone || isSubmitting}
+                            disabled={!contactPhone || !deliveryAddress || isSubmitting}
                         >
                             {isSubmitting ? (
                                 <>
