@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from './components/ui/card';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
-import { ShoppingCart, Sliders, X, Plus, Minus, Trash2, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, X, Plus, Minus, Trash2, ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
+import QRCode from 'react-qr-code';
 
-// Оптимизированный список продуктов с уменьшенными изображениями
 const PRODUCTS = [
     {
         id: 'waka-10000',
@@ -17,62 +17,7 @@ const PRODUCTS = [
             'Клубничный взрыв', 'Личи Взрыв', 'Клубника Банан', 'Клубника и манго', 'Мягкий капучино'
         ]
     },
-    {
-        id: 'waka-8000',
-        name: 'Waka 8000',
-        price: 12000,
-        image: 'https://cis.wakavaping.com/cdn/shop/files/DM8000_300x.png?v=1713171516',
-        puffs: 8000,
-        flavors: ['Арбуз', 'Манго', 'Клубника', 'Виноград', 'Мята', 'Личи', 'Персик', 'Ананас', 'Кокос']
-    },
-    {
-        id: 'waka-6000',
-        name: 'Waka 6000',
-        price: 9000,
-        image: 'https://cis.wakavaping.com/cdn/shop/files/SMASH-_Red_0f291a25-5fc6-40a3-81d7-ce95651015ce.png?v=1713170708&width=1920',
-        puffs: 6000,
-        flavors: ['Вишня', 'Арбуз', 'Манго', 'Клубника', 'Личи', 'Персик', 'Ананас', 'Кокос']
-    },
-    {
-        id: 'waka-20000',
-        name: 'Waka 20000',
-        price: 19000,
-        image: 'https://cis.wakavaping.com/cdn/shop/files/3179fe9063be492760799fb3f4865c01_825304fa-4b9c-45c3-81f4-3d331dbdbe25.png?v=1716887989&width=960',
-        puffs: 20000,
-        flavors: ['Арбуз', 'Манго', 'Клубника', 'Личи', 'Персик', 'Ананас', 'Малина', 'Виноград', 'Грейпфрут', 'Черника', 'Мята']
-    },
-    {
-        id: 'waka-solo-2',
-        name: 'Waka Solo 2',
-        price: 6000,
-        image: 'https://cis.wakavaping.com/cdn/shop/files/Solo2_300x.png?v=1713171679',
-        puffs: 2000,
-        flavors: ['Арбуз', 'Манго', 'Клубника', 'Личи', 'Персик', 'Малина', 'Черника']
-    },
-    {
-        id: 'elfbar-ice-king',
-        name: 'Elfbar Ice King',
-        price: 22000,
-        image: 'https://static.insales-cdn.com/r/hoW-8JdxY_0/rs:fit:1000:1000:1/plain/images/products/1/1297/961430801/blue_razz_ice.png@png',
-        puffs: 30000,
-        flavors: ['Киви', 'Арбуз', 'Манго', 'Личи', 'Черника', 'Малина', 'Персик', 'Грейпфрут', 'Мята', 'Тропические фрукты']
-    },
-    {
-        id: 'elfbar-bc-5000',
-        name: 'Elfbar BC 5000',
-        price: 8000,
-        image: 'https://elfbarsvape.com.ua/wp-content/uploads/2023/01/BC5000U_Watermelon_Ice.webp',
-        puffs: 5000,
-        flavors: ['Личи', 'Манго', 'Черника', 'Грейпфрут', 'Арбуз', 'Клубника']
-    },
-    {
-        id: 'elfbar-planet',
-        name: 'Elfbar Planet',
-        price: 20000,
-        image: 'https://static.insales-cdn.com/r/TasO8i_JS5k/rs:fit:440:0:1/q:100/plain/images/products/1/5693/939439677/large_Elfbar_Planet_StrawberryPeach.webp@webp',
-        puffs: 20000,
-        flavors: ['Тропические фрукты', 'Манго', 'Арбуз', 'Малина', 'Клубника']
-    },
+    // ... другие продукты ...
 ];
 
 export default function DymokApp() {
@@ -88,13 +33,22 @@ export default function DymokApp() {
     const [checkDevice, setCheckDevice] = useState(true);
     const [promoCode, setPromoCode] = useState('');
     const [deliveryArea, setDeliveryArea] = useState('square');
-    const [managerLink, setManagerLink] = useState('');
+    const [orderNumber, setOrderNumber] = useState('');
+    const [showReceipt, setShowReceipt] = useState(false);
+    const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState('');
+    const [submitSuccess, setSubmitSuccess] = useState(false);
+    const [managerLink] = useState('https://t.me/haschwaltw');
+    const [paymentDetails] = useState({
+        cardNumber: '4400 4303 7037 3992',
+        bankName: 'Kaspi Bank',
+        recipientName: 'Иван Иванов'
+    });
 
-    // Мемоизированные функции
     const getTotalItems = useCallback(() => cart.reduce((total, item) => total + (item.quantity || 1), 0), [cart]);
     const getTotalPrice = useCallback(() => cart.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0), [cart]);
 
-    // Загрузка и сохранение корзины
     useEffect(() => {
         const savedCart = localStorage.getItem('cart');
         if (savedCart) {
@@ -111,7 +65,6 @@ export default function DymokApp() {
         localStorage.setItem('cart', JSON.stringify(cart));
     }, [cart]);
 
-    // Фильтрация продуктов
     useEffect(() => {
         const timer = setTimeout(() => {
             const filtered = PRODUCTS.filter(p =>
@@ -122,6 +75,23 @@ export default function DymokApp() {
 
         return () => clearTimeout(timer);
     }, [search]);
+
+    const generateOrderNumber = useCallback(() => {
+        const date = new Date();
+        const datePart = date.getFullYear().toString().slice(-2) + 
+                        (date.getMonth() + 1).toString().padStart(2, '0') + 
+                        date.getDate().toString().padStart(2, '0');
+        const randomPart = Math.floor(1000 + Math.random() * 9000);
+        return `ORD-${datePart}-${randomPart}`;
+    }, []);
+
+    const calculateDeliveryCost = () => {
+        switch (deliveryArea) {
+            case 'square': return 1500;
+            case 'city': return 2500;
+            default: return 0;
+        }
+    };
 
     const addToCart = useCallback((product, flavor) => {
         setCart(prevCart => {
@@ -166,89 +136,167 @@ export default function DymokApp() {
         ));
     }, [removeFromCart]);
 
-    const calculateDeliveryCost = () => {
-        switch (deliveryArea) {
-            case 'square':
-                return 1500;
-            case 'city':
-                return 2500;
-            case 'outside':
-                return 0; // индивидуальный тариф
-            default:
-                return 0;
-        }
-    };
-
-    const handleOrderPayment = () => {
-        // Генерация ссылки на менеджера (в реальном приложении это должно быть с сервера)
-        const randomId = Math.random().toString(36).substring(2, 8);
-        setManagerLink(`https://t.me/dymok_manager_${randomId}`);
+    const handleOrderPayment = async () => {
+        setIsSubmitting(true);
+        setSubmitError('');
         
-        // Здесь должна быть логика отправки данных на сервер
-        console.log('Order submitted:', {
-            cart,
-            contactPhone,
-            deliveryAddress,
-            checkDevice,
-            promoCode,
-            deliveryArea,
-            total: getTotalPrice() + calculateDeliveryCost()
-        });
-    };
+        try {
+            const newOrderNumber = generateOrderNumber();
+            setOrderNumber(newOrderNumber);
+            
+            // Формируем данные заказа
+            const orderData = {
+                orderNumber: newOrderNumber,
+                date: new Date().toLocaleString(),
+                items: cart.map(item => ({
+                    name: `${item.name} (${item.selectedFlavor})`,
+                    quantity: item.quantity || 1,
+                    price: item.price
+                })),
+                subtotal: getTotalPrice(),
+                delivery: deliveryArea === 'outside' ? 'Индивидуальный тариф' : calculateDeliveryCost(),
+                contactPhone,
+                deliveryAddress,
+                checkDevice,
+                promoCode,
+                paymentDetails
+            };
 
-    const renderMainContent = () => {
-        if (showCheckout) {
-            return renderCheckout();
+            // В реальном приложении здесь будет отправка на сервер
+            console.log('Отправка заказа:', orderData);
+            
+            // Имитация задержки отправки
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            setSubmitSuccess(true);
+            setShowReceipt(true);
+            setPaymentConfirmed(true);
+            
+            // Очищаем корзину после успешного оформления
+            setCart([]);
+            localStorage.removeItem('cart');
+            
+        } catch (error) {
+            console.error('Ошибка при оформлении заказа:', error);
+            setSubmitError('Произошла ошибка при оформлении заказа. Пожалуйста, попробуйте еще раз.');
+        } finally {
+            setIsSubmitting(false);
         }
-        return renderProductCatalog();
     };
 
-    const renderProductCatalog = () => (
-        <>
-            <h2 className="text-lg font-semibold mb-4 text-gray-300">Популярные товары</h2>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20">
-                {filteredProducts.map(product => (
-                    <Card
-                        key={product.id}
-                        className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300"
-                    >
-                        <CardContent className="p-0">
-                            <div className="relative aspect-square group">
-                                <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                    loading="lazy"
-                                    onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = 'https://via.placeholder.com/300x300?text=No+Image';
-                                    }}
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                                    <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">
-                                        {product.puffs.toLocaleString()} puff's
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="p-3">
-                                <h3 className="font-medium text-sm line-clamp-1 mb-1">{product.name}</h3>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-green-400 font-bold">{product.price.toLocaleString()} ₸</span>
-                                    <Button
-                                        size="sm"
-                                        className="bg-green-600 hover:bg-green-700 text-xs px-3 py-1 rounded-lg transition-colors"
-                                        onClick={() => setSelectedProduct(product)}
-                                    >
-                                        Выбрать
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+    const renderReceipt = () => (
+        <div className="bg-gray-800 rounded-xl p-5 border border-gray-700 mb-6">
+            <div className="flex items-center justify-center mb-4">
+                {submitSuccess ? (
+                    <CheckCircle className="text-green-500 mr-2" size={24} />
+                ) : (
+                    <Loader2 className="animate-spin text-yellow-500 mr-2" size={24} />
+                )}
+                <h3 className="text-xl font-bold">
+                    {submitSuccess ? `Ваш заказ #${orderNumber} оформлен!` : 'Оформление заказа...'}
+                </h3>
             </div>
-        </>
+            
+            {submitSuccess ? (
+                <>
+                    <div className="mb-6">
+                        <div className="flex justify-between py-2 border-b border-gray-700">
+                            <span className="text-gray-400">Дата:</span>
+                            <span>{new Date().toLocaleString()}</span>
+                        </div>
+                        
+                        <h4 className="font-medium mt-4 mb-2">Товары:</h4>
+                        {cart.map(item => (
+                            <div key={`${item.id}-${item.selectedFlavor}`} className="flex justify-between py-2">
+                                <span>
+                                    {item.name} ({item.selectedFlavor}) × {item.quantity || 1}
+                                </span>
+                                <span>{(item.price * (item.quantity || 1)).toLocaleString()}₸</span>
+                            </div>
+                        ))}
+                        
+                        <div className="flex justify-between py-2 border-t border-gray-700 mt-3">
+                            <span>Сумма товаров:</span>
+                            <span>{getTotalPrice().toLocaleString()}₸</span>
+                        </div>
+                        
+                        <div className="flex justify-between py-2">
+                            <span>Доставка:</span>
+                            <span>
+                                {deliveryArea === 'outside' 
+                                    ? 'Индивидуальный тариф (уточнит менеджер)' 
+                                    : `${calculateDeliveryCost().toLocaleString()}₸`}
+                            </span>
+                        </div>
+                        
+                        <div className="mt-6 p-4 bg-yellow-900/20 rounded-lg border border-yellow-800">
+                            <h4 className="font-medium text-yellow-400 mb-2">Важно!</h4>
+                            <p className="text-sm">
+                                Оплатите только стоимость товаров: <strong>{getTotalPrice().toLocaleString()}₸</strong>.
+                                Стоимость доставки уточнит менеджер после получения заказа.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-gray-700/30 p-4 rounded-lg mb-4">
+                        <h4 className="font-medium mb-2">Реквизиты для оплаты:</h4>
+                        <div className="bg-gray-900 p-3 rounded-lg mb-2">
+                            <p className="text-sm text-gray-400 mb-1">Номер карты:</p>
+                            <p className="font-mono text-lg">{paymentDetails.cardNumber}</p>
+                        </div>
+                        <div className="bg-gray-900 p-3 rounded-lg mb-2">
+                            <p className="text-sm text-gray-400 mb-1">Банк:</p>
+                            <p className="font-medium">{paymentDetails.bankName}</p>
+                        </div>
+                        <div className="bg-gray-900 p-3 rounded-lg">
+                            <p className="text-sm text-gray-400 mb-1">Получатель:</p>
+                            <p className="font-medium">{paymentDetails.recipientName}</p>
+                        </div>
+                        <p className="text-sm text-gray-300 mt-3">
+                            В комментарии к платежу укажите: <strong>{orderNumber}</strong>
+                        </p>
+                    </div>
+                    
+                    <div className="flex flex-col items-center mt-6">
+                        <p className="text-sm text-gray-400 mb-4">Или отсканируйте QR-код для оплаты:</p>
+                        <div className="p-3 bg-white rounded-lg mb-4">
+                            <QRCode 
+                                value={`bank://transfer?card=${paymentDetails.cardNumber.replace(/\s/g, '')}&amount=${getTotalPrice()}&comment=${orderNumber}`}
+                                size={128}
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="mt-6">
+                        <Button 
+                            asChild
+                            className="w-full bg-green-600 hover:bg-green-700 py-4 text-lg font-medium"
+                        >
+                            <a href={`${managerLink}?start=order_${orderNumber}`} target="_blank" rel="noopener noreferrer">
+                                Связаться с менеджером
+                            </a>
+                        </Button>
+                        <p className="text-sm text-gray-400 mt-2 text-center">
+                            После оплаты отправьте менеджеру скриншот чека и номер заказа
+                        </p>
+                    </div>
+                </>
+            ) : submitError ? (
+                <div className="bg-red-900/20 p-4 rounded-lg border border-red-800">
+                    <p className="text-red-400">{submitError}</p>
+                    <Button 
+                        className="w-full mt-4"
+                        onClick={handleOrderPayment}
+                    >
+                        Попробовать снова
+                    </Button>
+                </div>
+            ) : (
+                <div className="flex justify-center py-8">
+                    <Loader2 className="animate-spin text-gray-400" size={32} />
+                </div>
+            )}
+        </div>
     );
 
     const renderCheckout = () => (
@@ -266,26 +314,6 @@ export default function DymokApp() {
             </div>
 
             <div className="space-y-6">
-                {/* Оплата */}
-                <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-                    <h3 className="text-lg font-semibold mb-4">Оплата</h3>
-                    <div className="space-y-4">
-                        <div className="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
-                            <h4 className="font-medium mb-2">Банковский перевод по реквизитам карты:</h4>
-                            <div className="bg-gray-900 p-3 rounded-lg mb-3">
-                                <p className="text-sm text-gray-400 mb-1">Номер карты для оплаты:</p>
-                                <p className="font-mono text-lg">4400 4303 7037 3992</p>
-                            </div>
-                            <p className="text-sm text-gray-300">
-                                Примечание: Оплатите только стоимость товара, после оплаты нажмите на кнопку "Заказ оплачен", 
-                                вам выдаст ссылку на менеджера, обязательно отправьте ему чек и номер вашего заказа, 
-                                который вам выдаст бот.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Доставка */}
                 <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
                     <h3 className="text-lg font-semibold mb-4">Доставка</h3>
                     <div className="space-y-4">
@@ -358,7 +386,7 @@ export default function DymokApp() {
                                 <Input 
                                     value={deliveryAddress}
                                     onChange={(e) => setDeliveryAddress(e.target.value)}
-                                    placeholder="Желательно укажите ссылку на 2Гис"
+                                    placeholder="Укажите адрес или ссылку на 2Гис"
                                     className="w-full bg-gray-700 border-gray-600"
                                 />
                             </div>
@@ -366,7 +394,6 @@ export default function DymokApp() {
                     </div>
                 </div>
 
-                {/* Проверка устройства */}
                 <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
                     <label className="flex items-start gap-3">
                         <input 
@@ -376,16 +403,15 @@ export default function DymokApp() {
                             className="mt-1 text-green-500"
                         />
                         <div>
-                            <h3 className="font-medium mb-1">Проверка устройства на брак (только для одноразовых товаров)</h3>
+                            <h3 className="font-medium mb-1">Проверка устройства на брак</h3>
                             <p className="text-sm text-gray-400">
-                                Мы можем проверить ваше одноразовое устройство перед отправкой на наличие брака. 
-                                В случае отказа от проверки, мы снимаем с себя ответственность за наличие брака у вашего устройства.
+                                Мы проверим ваше устройство перед отправкой. При отказе от проверки
+                                ответственность за брак снимается.
                             </p>
                         </div>
                     </label>
                 </div>
 
-                {/* Промокод */}
                 <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
                     <h3 className="font-medium mb-3">Промокод</h3>
                     <div className="flex gap-2">
@@ -401,62 +427,78 @@ export default function DymokApp() {
                     </div>
                 </div>
 
-                {/* Итого */}
-                <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-                    <div className="space-y-3">
-                        <div className="flex justify-between">
-                            <span>Товары:</span>
-                            <span className="font-medium">{getTotalPrice().toLocaleString()}₸</span>
+                {paymentConfirmed ? (
+                    renderReceipt()
+                ) : (
+                    <div className="space-y-4">
+                        <div className="bg-yellow-900/20 rounded-xl p-4 border border-yellow-800">
+                            <h4 className="font-medium text-yellow-400 mb-2">Важно!</h4>
+                            <p className="text-sm">
+                                Оплатите только стоимость товаров: <strong>{getTotalPrice().toLocaleString()}₸</strong>.
+                                Стоимость доставки уточнит менеджер после получения заказа.
+                            </p>
                         </div>
-                        <div className="flex justify-between">
-                            <span>Доставка:</span>
-                            <span className="font-medium">
-                                {deliveryArea === 'outside' ? 'Индивидуальный тариф' : `${calculateDeliveryCost().toLocaleString()}₸`}
-                            </span>
-                        </div>
-                        <div className="border-t border-gray-700 pt-3 mt-3 flex justify-between">
-                            <span className="font-semibold">Итого:</span>
-                            <span className="text-green-400 font-bold text-lg">
-                                {deliveryArea === 'outside' 
-                                    ? 'Индивидуальный тариф' 
-                                    : `${(getTotalPrice() + calculateDeliveryCost()).toLocaleString()}₸`}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Кнопка оплаты */}
-                {managerLink ? (
-                    <div className="bg-green-900/20 rounded-xl p-5 border border-green-800">
-                        <h3 className="font-medium text-green-400 mb-3">Ваш заказ оформлен!</h3>
-                        <p className="text-sm mb-4">
-                            Пожалуйста, свяжитесь с менеджером по ссылке ниже и отправьте ему чек об оплате и номер заказа.
-                        </p>
+                        
                         <Button 
-                            asChild
-                            className="w-full bg-green-600 hover:bg-green-700"
+                            className="w-full py-4 text-lg font-medium bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
+                            onClick={handleOrderPayment}
+                            disabled={!contactPhone || isSubmitting}
                         >
-                            <a href={managerLink} target="_blank" rel="noopener noreferrer">
-                                Связаться с менеджером
-                            </a>
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="animate-spin mr-2" size={20} />
+                                    Оформление...
+                                </>
+                            ) : (
+                                'Я оплатил'
+                            )}
                         </Button>
                     </div>
-                ) : (
-                    <Button 
-                        className="w-full py-4 text-lg font-medium bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
-                        onClick={handleOrderPayment}
-                        disabled={!contactPhone}
-                    >
-                        Заказ оплачен
-                    </Button>
                 )}
             </div>
         </div>
     );
 
+    const renderProductCatalog = () => (
+        <>
+            <h2 className="text-lg font-semibold mb-4 text-gray-300">Популярные товары</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20">
+                {filteredProducts.map(product => (
+                    <Card
+                        key={product.id}
+                        className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300"
+                    >
+                        <CardContent className="p-0">
+                            <div className="relative aspect-square group">
+                                <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div className="p-3">
+                                <h3 className="font-medium text-sm line-clamp-1 mb-1">{product.name}</h3>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-green-400 font-bold">{product.price.toLocaleString()} ₸</span>
+                                    <Button
+                                        size="sm"
+                                        className="bg-green-600 hover:bg-green-700 text-xs px-3 py-1 rounded-lg transition-colors"
+                                        onClick={() => setSelectedProduct(product)}
+                                    >
+                                        Выбрать
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        </>
+    );
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100 px-4 py-3">
-            {/* Улучшенный хедер */}
             <header className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
                     <img
@@ -480,7 +522,6 @@ export default function DymokApp() {
                 </Button>
             </header>
 
-            {/* Поиск с улучшенным дизайном */}
             {!showCheckout && (
                 <div className="relative mb-6">
                     <Input
@@ -489,24 +530,10 @@ export default function DymokApp() {
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full bg-gray-800 border-gray-700 text-white placeholder-gray-400 rounded-xl py-5 px-4 focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
-                    <svg
-                        className="absolute right-3 top-3 h-5 w-5 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                    </svg>
                 </div>
             )}
 
-            {renderMainContent()}
+            {showCheckout ? renderCheckout() : renderProductCatalog()}
 
             {/* Модальное окно выбора вкуса */}
             {selectedProduct && (
@@ -577,7 +604,7 @@ export default function DymokApp() {
                 </div>
             )}
 
-            {/* Улучшенный дизайн корзины */}
+            {/* Корзина */}
             {showCart && (
                 <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-end justify-center z-50">
                     <div className="bg-gray-800 rounded-t-2xl w-full max-w-2xl max-h-[85vh] flex flex-col border-t border-gray-700 shadow-xl">
