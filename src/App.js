@@ -4,7 +4,7 @@ import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { ShoppingCart, Sliders, X, Plus, Minus, Trash2 } from 'lucide-react';
 
-// Оптимизированный список продуктов с уменьшенными изображениями
+// Оптимизированный список продуктов
 const PRODUCTS = [
     {
         id: 'waka-10000',
@@ -74,6 +74,7 @@ const PRODUCTS = [
         flavors: ['Тропические фрукты', 'Манго', 'Арбуз', 'Малина', 'Клубника']
     },
 ];
+
 export default function DymokApp() {
     const [search, setSearch] = useState('');
     const [cart, setCart] = useState([]);
@@ -82,11 +83,9 @@ export default function DymokApp() {
     const [showCart, setShowCart] = useState(false);
     const [filteredProducts, setFilteredProducts] = useState(PRODUCTS);
 
-    // Мемоизированные функции для оптимизации производительности
     const getTotalItems = useCallback(() => cart.reduce((total, item) => total + (item.quantity || 1), 0), [cart]);
     const getTotalPrice = useCallback(() => cart.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0), [cart]);
 
-    // Загрузка и сохранение корзины
     useEffect(() => {
         const savedCart = localStorage.getItem('cart');
         if (savedCart) {
@@ -103,7 +102,6 @@ export default function DymokApp() {
         localStorage.setItem('cart', JSON.stringify(cart));
     }, [cart]);
 
-    // Фильтрация продуктов по названию
     useEffect(() => {
         const timer = setTimeout(() => {
             const filtered = PRODUCTS.filter(p =>
@@ -159,15 +157,16 @@ export default function DymokApp() {
     }, [removeFromCart]);
 
     return (
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white min-h-screen px-4 py-4">
-            <div className="flex justify-between items-center mb-3">
+        <div className="bg-gray-900 text-white min-h-screen px-4 py-4">
+            {/* Заголовок */}
+            <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-2">
-                    <img src="https://cdn1.cdn-telegram.org/file/QyqXMkgidt5GVueQgruR5IUjmFOINbW-6AjrChU9MAnIAcksbBPTTZEO4wiNguIgZKcMb6gsBVDHaEYOmkmBkAOtF1fpVfy8F3a7HxWljk0HYF8qtTqQ0MpoOi28gBmeHUZKY6VpOna_KfY4g2I28o8wp1yEcyZQa6lr5gCoebemFm01APH0B9Ohnym1fmJjVR50dvc7mGzum_BZqfcxQBF1KgXC4wEbdaTe2rj-XzHlfMZzOuRhc6Pn2nVnhgGYp0SyZLFK0Iaa-3IsNF1CwREZPgtzFX-vp6HWCZLMWGbzXePJ-ZIiyw_iK1qQ7pzaz9nFrIuDPhbmmOMuoChQ1A.jpg" className="w-10 h-10 rounded-full" alt="logo" />
+                    <img src="https://cdn1.cdn-telegram.org/file/QyqXMkgidt5GVueQgruR5IUjmFOINbW-6AjrChU9MAnIAcksbBPTTZEO4wiNguIgZKcMb6gsBVDHaEYOmkmBkAOtF1fpVfy8F3a7HxWljk0HYF8qtTqQ0MpoOi28gBmeHUZKY6VpOna_KfY4g2I28o8wp1yEcyZQa6lr5gCoebemFm01APH0B9Ohnym1fmJjVR50dvc7mGzum_BZqfcxQBF1KgXC4wEbdaTe2rj-XzHlfMZzOuRhc6Pn2nVnhgGYp0SyZLFK0Iaa-3IsNF1CwREZPgtzFX-vp6HWCZLMWGbzXePJ-ZIiyw_iK1qQ7pzaz9nFrIuDPhbmmOMuoChQ1A.jpg" className="w-8 h-8 rounded-full" alt="logo" />
                     <h1 className="text-xl font-bold">Дымок</h1>
                 </div>
                 <Button
                     size="sm"
-                    className="bg-pink-600 text-white px-4 py-2 text-sm rounded-xl shadow-lg hover:scale-105 transition-transform"
+                    className="bg-gray-600 text-white px-4 py-2 text-sm"
                     onClick={() => window.open('https://t.me/dymokminimarket', '_blank')}
                 >
                     Наш канал
@@ -175,32 +174,35 @@ export default function DymokApp() {
             </div>
 
             {/* Поиск */}
-            <div className="flex items-center gap-2 mb-5">
+            <div className="flex items-center gap-2 mb-4">
                 <Input
-                    placeholder="Поиск товаров..."
+                    placeholder="Ищете вкус?"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="flex-1 bg-white text-black border-none text-sm p-3 rounded-xl"
+                    className="flex-1 bg-gray-800 text-white border-none text-sm h-10"
                 />
             </div>
 
-            <h2 className="text-xl font-semibold mb-4">Товары</h2>
+            <h2 className="text-lg font-semibold mb-4">Продукты</h2>
 
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 pb-16">
+            {/* Список продуктов */}
+            <div className="grid grid-cols-2 gap-4">
                 {filteredProducts.map(product => (
-                    <Card key={product.id} className="bg-gradient-to-r from-pink-500 to-purple-500 p-4 rounded-xl shadow-lg hover:scale-105 transition-transform">
-                        <CardContent className="flex flex-col items-center">
-                            <img
-                                src={product.image}
-                                alt={product.name}
-                                className="w-24 h-24 object-cover rounded-xl mb-2"
-                                loading="lazy"
-                            />
+                    <Card key={product.id} className="bg-gray-800 hover:bg-gray-700 transition duration-200 ease-in-out rounded-lg border-gray-600">
+                        <CardContent className="p-4">
+                            <div className="relative aspect-square mb-4">
+                                <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="rounded-lg w-full h-full object-cover"
+                                    loading="lazy"
+                                />
+                            </div>
                             <div className="text-sm font-semibold">{product.name}</div>
-                            <div className="text-xs text-gray-200 mb-2">{product.price.toLocaleString()} тг</div>
+                            <div className="text-xs text-gray-400 mb-3">{product.price.toLocaleString()} тг</div>
                             <Button
                                 size="sm"
-                                className="bg-green-600 text-white text-xs py-2 px-4 rounded-full hover:bg-green-700"
+                                className="w-full text-xs py-2 h-9 bg-green-600 hover:bg-green-700"
                                 onClick={() => setSelectedProduct(product)}
                             >
                                 Добавить
@@ -210,8 +212,107 @@ export default function DymokApp() {
                 ))}
             </div>
 
-            {/* Корзина и модальные окна */}
-            {/* Далее идет остальная часть кода */}
-        </div>
-    );
-}
+            {/* Модальное окно выбора вкуса */}
+            {selectedProduct && (
+                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50">
+                    <div className="bg-gray-800 rounded-lg p-6 w-full max-w-sm">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold">Выберите вкус</h3>
+                            <button
+                                onClick={() => {
+                                    setSelectedProduct(null);
+                                    setSelectedFlavor('');
+                                }}
+                                aria-label="Закрыть"
+                                className="text-gray-400"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="mb-4">
+                            <div className="relative aspect-square mb-3">
+                                <img
+                                    src={selectedProduct.image}
+                                    alt={selectedProduct.name}
+                                    className="rounded-lg w-full h-full object-cover"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div className="text-sm font-semibold">{selectedProduct.name}</div>
+                            <div className="text-xs text-gray-400">{selectedProduct.price.toLocaleString()} тг</div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 mb-4">
+                            {selectedProduct.flavors.map(flavor => (
+                                <Button
+                                    key={flavor}
+                                    variant={selectedFlavor === flavor ? 'default' : 'outline'}
+                                    size="sm"
+                                    className={`text-xs py-2 h-auto ${selectedFlavor === flavor ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                                    onClick={() => setSelectedFlavor(flavor)}
+                                >
+                                    <span className="line-clamp-1">{flavor}</span>
+                                </Button>
+                            ))}
+                        </div>
+
+                        <Button
+                            className="w-full bg-green-600 hover:bg-green-700 text-sm py-2"
+                            disabled={!selectedFlavor}
+                            onClick={() => addToCart(selectedProduct, selectedFlavor)}
+                        >
+                            Добавить в корзину
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            {/* Корзина */}
+            {showCart && (
+                <div className="fixed inset-0 bg-black bg-opacity-80 flex items-end justify-center z-50">
+                    <div className="bg-gray-800 rounded-t-lg w-full max-h-[85vh] flex flex-col">
+                        <div className="flex justify-between items-center p-4 border-b border-gray-700 sticky top-0 bg-gray-800 z-10">
+                            <h3 className="text-lg font-semibold">Корзина ({getTotalItems()})</h3>
+                            <button
+                                onClick={() => setShowCart(false)}
+                                aria-label="Закрыть корзину"
+                                className="text-gray-400"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4">
+                            {cart.length === 0 ? (
+                                <div className="text-center text-gray-400 py-8">Корзина пуста</div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {cart.map(item => (
+                                        <div
+                                            key={`${item.id}-${item.selectedFlavor}`}
+                                            className="flex items-center gap-4 p-4 bg-gray-700 rounded-lg"
+                                        >
+                                            <div className="relative w-16 h-16 flex-shrink-0">
+                                                <img
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    className="w-full h-full object-cover rounded"
+                                                    loading="lazy"
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="text-sm font-semibold truncate">{item.name}</div>
+                                                <div className="text-xs text-gray-400">{item.selectedFlavor}</div>
+                                                <div className="text-xs">{item.price.toLocaleString()} тг</div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    size="xs"
+                                                    variant="outline"
+                                                    className="h-6 w-6 p-0"
+                                                    onClick={() => updateQuantity(item.id, item.selectedFlavor, (item.quantity || 1) - 1)}
+                                                >
+                                                    <Minus size={12} />
+                                                </Button>
+                                                <span className="text-xs w-5 text-center">{item.quantity || 
