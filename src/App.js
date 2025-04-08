@@ -17,9 +17,63 @@ const PRODUCTS = [
             'Клубничный взрыв', 'Личи Взрыв', 'Клубника Банан', 'Клубника и манго', 'Мягкий капучино'
         ]
     },
-    // другие продукты
+    {
+        id: 'waka-8000',
+        name: 'Waka 8000',
+        price: 12000,
+        image: 'https://cis.wakavaping.com/cdn/shop/files/DM8000_300x.png?v=1713171516',
+        puffs: 8000,
+        flavors: ['Арбуз', 'Манго', 'Клубника', 'Виноград', 'Мята', 'Личи', 'Персик', 'Ананас', 'Кокос']
+    },
+    {
+        id: 'waka-6000',
+        name: 'Waka 6000',
+        price: 9000,
+        image: 'https://cis.wakavaping.com/cdn/shop/files/SMASH-_Red_0f291a25-5fc6-40a3-81d7-ce95651015ce.png?v=1713170708&width=1920',
+        puffs: 6000,
+        flavors: ['Вишня', 'Арбуз', 'Манго', 'Клубника', 'Личи', 'Персик', 'Ананас', 'Кокос']
+    },
+    {
+        id: 'waka-20000',
+        name: 'Waka 20000',
+        price: 19000,
+        image: 'https://cis.wakavaping.com/cdn/shop/files/3179fe9063be492760799fb3f4865c01_825304fa-4b9c-45c3-81f4-3d331dbdbe25.png?v=1716887989&width=960',
+        puffs: 20000,
+        flavors: ['Арбуз', 'Манго', 'Клубника', 'Личи', 'Персик', 'Ананас', 'Малина', 'Виноград', 'Грейпфрут', 'Черника', 'Мята']
+    },
+    {
+        id: 'waka-solo-2',
+        name: 'Waka Solo 2',
+        price: 6000,
+        image: 'https://cis.wakavaping.com/cdn/shop/files/Solo2_300x.png?v=1713171679',
+        puffs: 2000,
+        flavors: ['Арбуз', 'Манго', 'Клубника', 'Личи', 'Персик', 'Малина', 'Черника']
+    },
+    {
+        id: 'elfbar-ice-king',
+        name: 'Elfbar Ice King',
+        price: 22000,
+        image: 'https://static.insales-cdn.com/r/hoW-8JdxY_0/rs:fit:1000:1000:1/plain/images/products/1/1297/961430801/blue_razz_ice.png@png',
+        puffs: 30000,
+        flavors: ['Киви', 'Арбуз', 'Манго', 'Личи', 'Черника', 'Малина', 'Персик', 'Грейпфрут', 'Мята', 'Тропические фрукты']
+    },
+    {
+        id: 'elfbar-bc-5000',
+        name: 'Elfbar BC 5000',
+        price: 8000,
+        image: 'https://elfbarsvape.com.ua/wp-content/uploads/2023/01/BC5000U_Watermelon_Ice.webp',
+        puffs: 5000,
+        flavors: ['Личи', 'Манго', 'Черника', 'Грейпфрут', 'Арбуз', 'Клубника']
+    },
+    {
+        id: 'elfbar-planet',
+        name: 'Elfbar Planet',
+        price: 20000,
+        image: 'https://static.insales-cdn.com/r/TasO8i_JS5k/rs:fit:440:0:1/q:100/plain/images/products/1/5693/939439677/large_Elfbar_Planet_StrawberryPeach.webp@webp',
+        puffs: 20000,
+        flavors: ['Тропические фрукты', 'Манго', 'Арбуз', 'Малина', 'Клубника']
+    },
 ];
-
 export default function DymokApp() {
     const [search, setSearch] = useState('');
     const [cart, setCart] = useState([]);
