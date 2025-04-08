@@ -169,7 +169,13 @@ export default function DymokApp() {
                     <img src="https://api.logo.com/api/v2/images?design=lg_ZKr8H3ndN71oZLSd7v&u=ff2fc0ec5b7ab0ac231779e391f9f88ff27ee04daca1d04685988a526c540921&width=128&height=128&margins=24&fit=contain&format=webp&quality=60&tightBounds=true" className="w-8 h-8 rounded-full" alt="logo" />
                     <h1 className="text-lg font-bold">Дымок</h1>
                 </div>
-                <Button size="sm" className="bg-green-500 text-white px-3 py-1 text-sm">Наш канал</Button>
+               <Button 
+                    size="sm" 
+                    className="bg-green-500 text-white px-3 py-1 text-sm"
+                    onClick={() => window.open('https://t.me/dymokminimarket', '_blank')}
+                >
+                    Наш канал
+                    </Button>
             </div>
 
             {/* Поиск с оптимизацией для мобильных */}
