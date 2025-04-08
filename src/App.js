@@ -73,7 +73,6 @@ const PRODUCTS = [
         puffs: 20000,
         flavors: ['Тропические фрукты', 'Манго', 'Арбуз', 'Малина', 'Клубника']
     },
-
 ];
 
 export default function DymokApp() {
@@ -105,12 +104,11 @@ export default function DymokApp() {
         localStorage.setItem('cart', JSON.stringify(cart));
     }, [cart]);
 
-    // Фильтрация продуктов с задержкой для уменьшения количества перерисовок
+    // Фильтрация продуктов по названию
     useEffect(() => {
         const timer = setTimeout(() => {
             const filtered = PRODUCTS.filter(p =>
-                p.name.toLowerCase().includes(search.toLowerCase()) ||
-                p.flavors.some(f => f.toLowerCase().includes(search.toLowerCase()))
+                p.name.toLowerCase().includes(search.toLowerCase())
             );
             setFilteredProducts(filtered);
         }, 300);
@@ -186,7 +184,6 @@ export default function DymokApp() {
                     onChange={(e) => setSearch(e.target.value)}
                     className="flex-1 bg-gray-800 text-white border-none text-sm h-9"
                 />
-                <Button variant="ghost" size="sm" className="p-2"><Sliders size={18} /></Button>
             </div>
 
             <h2 className="text-md font-semibold mb-2">Главная</h2>
