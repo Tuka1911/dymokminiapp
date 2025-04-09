@@ -88,11 +88,9 @@ export default function DymokApp() {
     const [promoCode, setPromoCode] = useState('');
     const [deliveryArea, setDeliveryArea] = useState('square');
     const [orderNumber, setOrderNumber] = useState('');
-    const [showReceipt, setShowReceipt] = useState(false);
     const [paymentConfirmed, setPaymentConfirmed] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
-    const [submitSuccess, setSubmitSuccess] = useState(false);
     const [managerLink] = useState('https://t.me/haschwaltw');
     const [paymentDetails] = useState({
         cardNumber: '4400 4303 7037 3992',
@@ -185,34 +183,6 @@ export default function DymokApp() {
         ));
     }, [removeFromCart]);
 
-    const generateReceiptContent = (orderNum) => {
-        let receipt = `Заказ #${orderNum}\n`;
-        receipt += `Дата: ${new Date().toLocaleString()}\n\n`;
-        receipt += 'Товары:\n';
-        
-        cart.forEach(item => {
-            receipt += `- ${item.name} (${item.selectedFlavor}) × ${item.quantity || 1} = ${(item.price * (item.quantity || 1)).toLocaleString()}₸\n`;
-        });
-
-        receipt += `\nИтого: ${getTotalPrice().toLocaleString()}₸\n\n`;
-        receipt += `После оплаты отправьте менеджеру скриншот чека и номер заказа\n`;
-        receipt += `Ссылка на менеджера: ${managerLink}`;
-
-        return receipt;
-    };
-
-    const downloadReceipt = (content, filename) => {
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
-
     const handleOrderPayment = async () => {
         if (!contactPhone || !deliveryAddress) {
             setSubmitError('Пожалуйста, заполните контактный телефон и адрес доставки');
@@ -225,15 +195,8 @@ export default function DymokApp() {
         try {
             const newOrderNumber = generateOrderNumber();
             setOrderNumber(newOrderNumber);
-
-            // Формируем и скачиваем чек
-            const receiptContent = generateReceiptContent(newOrderNumber);
-            downloadReceipt(receiptContent, `order_${newOrderNumber}.txt`);
-
-            setSubmitSuccess(true);
-            setShowReceipt(true);
             setPaymentConfirmed(true);
-
+            
             // Очищаем корзину
             setCart([]);
             localStorage.removeItem('cart');
@@ -303,162 +266,164 @@ export default function DymokApp() {
 
     const renderCheckout = () => (
         <div className="pb-20">
-            <div className="flex items-center mb-6">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="mr-2"
-                    onClick={() => setShowCheckout(false)}
-                >
-                    <ArrowLeft size={20} />
-                </Button>
-                <h2 className="text-xl font-bold">Оформление заказа</h2>
-            </div>
-
-            <div className="space-y-6">
-                <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-                    <h3 className="text-lg font-semibold mb-4">Доставка</h3>
-                    <div className="space-y-4">
-                        <div className="space-y-3">
-                            <h4 className="font-medium">Стоимость доставки:</h4>
-                            <div className="flex flex-col gap-2">
-                                <label className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg border border-gray-600">
-                                    <input
-                                        type="radio"
-                                        name="deliveryArea"
-                                        checked={deliveryArea === 'square'}
-                                        onChange={() => setDeliveryArea('square')}
-                                        className="text-green-500"
-                                    />
-                                    <div className="flex-1">
-                                        <p>В квадрате (1500₸)</p>
-                                        <p className="text-sm text-gray-400">Саина – Рыскулова – Восточка – Аль-Фараби</p>
-                                    </div>
-                                </label>
-                                <label className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg border border-gray-600">
-                                    <input
-                                        type="radio"
-                                        name="deliveryArea"
-                                        checked={deliveryArea === 'city'}
-                                        onChange={() => setDeliveryArea('city')}
-                                        className="text-green-500"
-                                    />
-                                    <div className="flex-1">
-                                        <p>В пределах города (2500₸)</p>
-                                        <p className="text-sm text-gray-400">За пределами квадрата, но в черте города</p>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Контактный телефон *</label>
-                                <Input
-                                    type="tel"
-                                    value={contactPhone}
-                                    onChange={(e) => setContactPhone(e.target.value)}
-                                    placeholder="+7 (777) 123-45-67"
-                                    className="w-full bg-gray-700 border-gray-600"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Адрес доставки *</label>
-                                <Input
-                                    value={deliveryAddress}
-                                    onChange={(e) => setDeliveryAddress(e.target.value)}
-                                    placeholder="Укажите точный адрес или ссылку на 2ГИС"
-                                    className="w-full bg-gray-700 border-gray-600"
-                                    required
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-                    <h3 className="text-lg font-semibold mb-4">Оплата</h3>
-                    <div className="bg-gray-900 p-4 rounded-lg mb-4">
-                        <p className="text-sm text-gray-400 mb-2">Номер карты для оплаты:</p>
-                        <p className="font-mono text-lg mb-4">{paymentDetails.cardNumber}</p>
-                        <p className="text-sm text-gray-400">
-                            Оплатите только стоимость товара, после оплаты нажмите на кнопку "Заказ оплачен", вам выдаст ссылку на менеджера, обязательно отправьте ему чек и номер вашего заказа, который вам выдаст бот
-                        </p>
-                    </div>
-                </div>
-
-                <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-                    <label className="flex items-start gap-3">
-                        <input
-                            type="checkbox"
-                            checked={checkDevice}
-                            onChange={(e) => setCheckDevice(e.target.checked)}
-                            className="mt-1 text-green-500"
-                        />
-                        <div>
-                            <h3 className="font-medium mb-1">Проверка устройства на брак</h3>
-                            <p className="text-sm text-gray-400">
-                                Мы проверим ваше устройство перед отправкой. При отказе от проверки
-                                ответственность за брак снимается.
-                            </p>
-                        </div>
-                    </label>
-                </div>
-
-                <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-                    <h3 className="font-medium mb-3">Промокод</h3>
-                    <div className="flex gap-2">
-                        <Input
-                            value={promoCode}
-                            onChange={(e) => setPromoCode(e.target.value)}
-                            placeholder="Введите промокод"
-                            className="flex-1 bg-gray-700 border-gray-600"
-                        />
-                        <Button variant="outline" className="border-gray-600">
-                            Применить
-                        </Button>
-                    </div>
-                </div>
-
-                <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-                    <h3 className="text-lg font-semibold mb-4">Итого</h3>
-                    <div className="space-y-3">
-                        <div className="flex justify-between">
-                            <span>Сумма товаров:</span>
-                            <span className="font-medium">{getTotalPrice().toLocaleString()}₸</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>Доставка:</span>
-                            <span className="text-gray-400">Стоимость доставки вам напишет менеджер</span>
-                        </div>
-                    </div>
-                </div>
-
-                {paymentConfirmed ? (
-                    renderReceipt()
-                ) : (
-                    <div className="space-y-4">
-                        {submitError && (
-                            <div className="text-red-400 text-sm text-center">{submitError}</div>
-                        )}
+            {paymentConfirmed ? (
+                renderReceipt()
+            ) : (
+                <>
+                    <div className="flex items-center mb-6">
                         <Button
-                            className="w-full py-4 text-lg font-medium bg-red-600 hover:bg-red-700"
-                            onClick={handleOrderPayment}
-                            disabled={!contactPhone || !deliveryAddress || isSubmitting}
+                            variant="ghost"
+                            size="icon"
+                            className="mr-2"
+                            onClick={() => setShowCheckout(false)}
                         >
-                            {isSubmitting ? (
-                                <>
-                                    <Loader2 className="animate-spin mr-2" size={20} />
-                                    Оформление...
-                                </>
-                            ) : (
-                                'Заказ оплачен'
-                            )}
+                            <ArrowLeft size={20} />
                         </Button>
+                        <h2 className="text-xl font-bold">Оформление заказа</h2>
                     </div>
-                )}
-            </div>
+
+                    <div className="space-y-6">
+                        <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
+                            <h3 className="text-lg font-semibold mb-4">Доставка</h3>
+                            <div className="space-y-4">
+                                <div className="space-y-3">
+                                    <h4 className="font-medium">Стоимость доставки:</h4>
+                                    <div className="flex flex-col gap-2">
+                                        <label className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+                                            <input
+                                                type="radio"
+                                                name="deliveryArea"
+                                                checked={deliveryArea === 'square'}
+                                                onChange={() => setDeliveryArea('square')}
+                                                className="text-green-500"
+                                            />
+                                            <div className="flex-1">
+                                                <p>В квадрате (1500₸)</p>
+                                                <p className="text-sm text-gray-400">Саина – Рыскулова – Восточка – Аль-Фараби</p>
+                                            </div>
+                                        </label>
+                                        <label className="flex items-center gap-3 p-3 bg-gray-700/30 rounded-lg border border-gray-600">
+                                            <input
+                                                type="radio"
+                                                name="deliveryArea"
+                                                checked={deliveryArea === 'city'}
+                                                onChange={() => setDeliveryArea('city')}
+                                                className="text-green-500"
+                                            />
+                                            <div className="flex-1">
+                                                <p>В пределах города (2500₸)</p>
+                                                <p className="text-sm text-gray-400">За пределами квадрата, но в черте города</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Контактный телефон *</label>
+                                        <Input
+                                            type="tel"
+                                            value={contactPhone}
+                                            onChange={(e) => setContactPhone(e.target.value)}
+                                            placeholder="+7 (777) 123-45-67"
+                                            className="w-full bg-gray-700 border-gray-600"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Адрес доставки *</label>
+                                        <Input
+                                            value={deliveryAddress}
+                                            onChange={(e) => setDeliveryAddress(e.target.value)}
+                                            placeholder="Укажите точный адрес или ссылку на 2ГИС"
+                                            className="w-full bg-gray-700 border-gray-600"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
+                            <h3 className="text-lg font-semibold mb-4">Оплата</h3>
+                            <div className="bg-gray-900 p-4 rounded-lg mb-4">
+                                <p className="text-sm text-gray-400 mb-2">Номер карты для оплаты:</p>
+                                <p className="font-mono text-lg mb-4">{paymentDetails.cardNumber}</p>
+                                <p className="text-sm text-gray-400">
+                                    Оплатите только стоимость товара, после оплаты нажмите на кнопку "Заказ оплачен", вам выдаст ссылку на менеджера, обязательно отправьте ему чек и номер вашего заказа
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
+                            <label className="flex items-start gap-3">
+                                <input
+                                    type="checkbox"
+                                    checked={checkDevice}
+                                    onChange={(e) => setCheckDevice(e.target.checked)}
+                                    className="mt-1 text-green-500"
+                                />
+                                <div>
+                                    <h3 className="font-medium mb-1">Проверка устройства на брак</h3>
+                                    <p className="text-sm text-gray-400">
+                                        Мы проверим ваше устройство перед отправкой. При отказе от проверки
+                                        ответственность за брак снимается.
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
+                            <h3 className="font-medium mb-3">Промокод</h3>
+                            <div className="flex gap-2">
+                                <Input
+                                    value={promoCode}
+                                    onChange={(e) => setPromoCode(e.target.value)}
+                                    placeholder="Введите промокод"
+                                    className="flex-1 bg-gray-700 border-gray-600"
+                                />
+                                <Button variant="outline" className="border-gray-600">
+                                    Применить
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
+                            <h3 className="text-lg font-semibold mb-4">Итого</h3>
+                            <div className="space-y-3">
+                                <div className="flex justify-between">
+                                    <span>Сумма товаров:</span>
+                                    <span className="font-medium">{getTotalPrice().toLocaleString()}₸</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Доставка:</span>
+                                    <span className="text-gray-400">Стоимость доставки вам напишет менеджер</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            {submitError && (
+                                <div className="text-red-400 text-sm text-center">{submitError}</div>
+                            )}
+                            <Button
+                                className="w-full py-4 text-lg font-medium bg-green-600 hover:bg-green-700"
+                                onClick={handleOrderPayment}
+                                disabled={!contactPhone || !deliveryAddress || isSubmitting}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="animate-spin mr-2" size={20} />
+                                        Оформление...
+                                    </>
+                                ) : (
+                                    'Заказ оплачен'
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 
@@ -705,7 +670,7 @@ export default function DymokApp() {
                 </div>
             )}
 
-            {!showCheckout && (
+            {!showCheckout && !paymentConfirmed && (
                 <div className="fixed bottom-6 right-6 z-40">
                     <Button
                         className="relative bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 rounded-full p-4 shadow-xl transition-all duration-300 group"
