@@ -211,36 +211,31 @@ export default function DymokApp() {
   // В функции renderReceipt заменим текущую ссылку на менеджера:
 const renderReceipt = () => {
     const orderedItems = [...cart];
+    const totalPrice = orderedItems.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
     
-    // Формируем список товаров только если они есть
-    const productsList = orderedItems.length > 0 
-        ? `📦 Товары:\n${orderedItems.map(item => 
-            `- ${item.name} (${item.selectedFlavor}) × ${item.quantity || 1} = ${item.price * (item.quantity || 1)}₸`
-          ).join('\n')}`
-        : '';
-
     // Формируем текст сообщения для менеджера
     const messageForManager = `
-🛒 Новый заказ #${orderNumber}
+🛒 *Новый заказ #${orderNumber}*
 
-${contactPhone ? `📞 Телефон: ${contactPhone}\n` : ''}
-${deliveryAddress ? `📍 Адрес: ${deliveryAddress}\n` : ''}
-${deliveryArea ? `🚚 Зона доставки: ${deliveryArea === 'square' ? 'В квадрате (1500₸)' : 'По городу (2500₸)'}\n` : ''}
+👤 *Клиент:*
+📞 Телефон: ${contactPhone || 'Не указан'}
+📍 Адрес: ${deliveryAddress || 'Не указан'}
+🚚 Зона доставки: ${deliveryArea === 'square' ? 'В квадрате (1500₸)' : 'По городу (2500₸)'}
 
-${productsList}
+📦 *Товары:*
+${orderedItems.map(item => 
+`- ${item.name} (${item.selectedFlavor}) × ${item.quantity || 1} = ${(item.price * (item.quantity || 1)).toLocaleString()}₸`
+).join('\n')}
 
-💰 Итого: ${orderedItems.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0)}₸
+💰 *Итого к оплате: ${totalPrice.toLocaleString()}₸*
     `.trim();
 
     // Кодируем сообщение для URL
     const encodedMessage = encodeURIComponent(messageForManager);
     
-    // Формируем ссылку с предзаполненным сообщением
-    const managerLinkWithOrder = `${managerLink}?text=${encodedMessage}`;
-
     return (
         <div className="bg-gray-800 rounded-xl p-5 border border-gray-700 mb-6">
-            {/* ... остальной код остается таким же ... */}
+            {/* ... остальной код ... */}
             
             <div className="mt-6">
                 <Button
@@ -248,21 +243,13 @@ ${productsList}
                     className="w-full bg-green-600 hover:bg-green-700 py-4 text-lg font-medium"
                 >
                     <a 
-                        href={managerLinkWithOrder} 
+                        href={`${managerLink}?text=${encodedMessage}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        onClick={() => {
-                            // Очищаем корзину после перехода к менеджеру
-                            setCart([]);
-                            localStorage.removeItem('cart');
-                        }}
                     >
                         Связаться с менеджером
                     </a>
                 </Button>
-                <p className="text-sm text-gray-400 mt-2 text-center">
-                    После оплаты отправьте менеджеру скриншот чека и номер заказа
-                </p>
             </div>
         </div>
     );
