@@ -380,6 +380,17 @@ export default function DymokApp() {
                 </div>
 
                 <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
+                    <h3 className="text-lg font-semibold mb-4">Оплата</h3>
+                    <div className="bg-gray-900 p-4 rounded-lg mb-4">
+                        <p className="text-sm text-gray-400 mb-2">Номер карты для оплаты:</p>
+                        <p className="font-mono text-lg mb-4">{paymentDetails.cardNumber}</p>
+                        <p className="text-sm text-gray-400">
+                            Оплатите только стоимость товара, после оплаты нажмите на кнопку "Заказ оплачен", вам выдаст ссылку на менеджера, обязательно отправьте ему чек и номер вашего заказа, который вам выдаст бот
+                        </p>
+                    </div>
+                </div>
+
+                <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
                     <label className="flex items-start gap-3">
                         <input
                             type="checkbox"
@@ -398,14 +409,6 @@ export default function DymokApp() {
                 </div>
 
                 <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
-                    <h4 className="font-medium mb-2">Реквизиты для оплаты:</h4>
-                    <div className="bg-gray-900 p-3 rounded-lg">
-                        <p className="text-sm text-gray-400 mb-1">Номер карты:</p>
-                        <p className="font-mono text-lg">{paymentDetails.cardNumber}</p>
-                    </div>
-                </div>
-
-                <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
                     <h3 className="font-medium mb-3">Промокод</h3>
                     <div className="flex gap-2">
                         <Input
@@ -420,12 +423,29 @@ export default function DymokApp() {
                     </div>
                 </div>
 
+                <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
+                    <h3 className="text-lg font-semibold mb-4">Итого</h3>
+                    <div className="space-y-3">
+                        <div className="flex justify-between">
+                            <span>Сумма товаров:</span>
+                            <span className="font-medium">{getTotalPrice().toLocaleString()}₸</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Доставка:</span>
+                            <span className="text-gray-400">Стоимость доставки вам напишет менеджер</span>
+                        </div>
+                    </div>
+                </div>
+
                 {paymentConfirmed ? (
                     renderReceipt()
                 ) : (
                     <div className="space-y-4">
+                        {submitError && (
+                            <div className="text-red-400 text-sm text-center">{submitError}</div>
+                        )}
                         <Button
-                            className="w-full py-4 text-lg font-medium bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
+                            className="w-full py-4 text-lg font-medium bg-red-600 hover:bg-red-700"
                             onClick={handleOrderPayment}
                             disabled={!contactPhone || !deliveryAddress || isSubmitting}
                         >
@@ -435,7 +455,7 @@ export default function DymokApp() {
                                     Оформление...
                                 </>
                             ) : (
-                                'Я оплатил'
+                                'Заказ оплачен'
                             )}
                         </Button>
                     </div>
@@ -458,7 +478,7 @@ export default function DymokApp() {
                                 <img
                                     src={product.image}
                                     alt={product.name}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                                     loading="lazy"
                                 />
                             </div>
@@ -541,7 +561,7 @@ export default function DymokApp() {
                                 <img
                                     src={selectedProduct.image}
                                     alt={selectedProduct.name}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain p-4"
                                 />
                             </div>
                             <div className="flex justify-between items-center">
@@ -621,7 +641,7 @@ export default function DymokApp() {
                                                 <img
                                                     src={item.image}
                                                     alt={item.name}
-                                                    className="w-full h-full object-cover"
+                                                    className="w-full h-full object-contain p-1 bg-white"
                                                 />
                                             </div>
                                             <div className="flex-1 min-w-0">
