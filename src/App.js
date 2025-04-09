@@ -91,7 +91,7 @@ export default function DymokApp() {
     const [paymentConfirmed, setPaymentConfirmed] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
-    const [managerLink] = useState('https://t.me/haschwaltw');
+    const [managerLink] = useState('https://t.me/dym1911');
     const [paymentDetails] = useState({
         cardNumber: '4400 4303 7037 3992',
         bankName: 'Kaspi Bank',
