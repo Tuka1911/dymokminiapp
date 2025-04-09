@@ -497,7 +497,7 @@ ${orderedItems.map(item =>
                 <Button
                     size="sm"
                     className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-4 py-2 rounded-lg shadow-md transition-all duration-300"
-                    onClick={() => window.open('https://t.me/dymokminimarket', '_blank')}
+                    onClick={() => window.open('https://t.me/+FGVlDp02RYwyMWYx', '_blank')}
                 >
                     Наш канал
                 </Button>
