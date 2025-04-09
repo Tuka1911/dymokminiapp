@@ -483,7 +483,7 @@ ${orderedItems.map(item =>
             <header className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
                     <img
-                        src="https://cdn1.cdn-telegram.org/file/QyqXMkgidt5GVueQgruR5IUjmFOINbW-6AjrChU9MAnIAcksbBPTTZEO4wiNguIgZKcMb6gsBVDHaEYOmkmBkAOtF1fpVfy8F3a7HxWljk0HYF8qtTqQ0MpoOi28gBmeHUZKY6VpOna_KfY4g2I28o8wp1yEcyZQa6lr5gCoebemFm01APH0B9Ohnym1fmJjVR50dvc7mGzum_BZqfcxQBF1KgXC4wEbdaTe2rj-XzHlfMZzOuRhc6Pn2nVnhgGYp0SyZLFK0Iaa-3IsNF1CwREZPgtzFX-vp6HWCZLMWGbzXePJ-ZIiyw_iK1qQ7pzaz9nFrIuDPhbmmOMuoChQ1A.jpg"
+                        src="https://cdn1.cdn-telegram.org/file/WaRKP9ufM37Jct3Y6hfRrnltNnE0bgDflzjCuTNsLg7YDn2MAXMGKEeZjm6PbHh84dHUoV-EIoKWhceYXe0a0UuaD5ZH6W6pDcKWjMahVeL2fXIVyqcoKJ-VsNuEPlyTilTfXPnt-IXzBxYm2xMuOTLb-XUYPPGGVcBwDnjWAZLidV7iMAXLT4hIVKp2n3drfgNMWw3MHzTv4MvTs02KwSZPdcE-2k0l-svF0RHb_onCZTk0NEbr6GwN8CsJ5MXm3yWeF37WvxgiBFts-rnhyblEH9Q1q-pyYeg3CDK5miVagupIga9XcpphIcpFALzs1KnAjrlRtDsVu7iHtbW8tQ.jpg"
                         className="w-10 h-10 rounded-full border border-gray-600 shadow-md"
                         alt="Логотип Дымок"
                     />
