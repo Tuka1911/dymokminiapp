@@ -217,7 +217,6 @@ const renderReceipt = () => {
     const messageForManager = `
 🛒 *Новый заказ #${orderNumber}*
 
-👤 *Клиент:*
 📞 Телефон: ${contactPhone || 'Не указан'}
 📍 Адрес: ${deliveryAddress || 'Не указан'}
 🚚 Зона доставки: ${deliveryArea === 'square' ? 'В квадрате (1500₸)' : 'По городу (2500₸)'}
@@ -226,9 +225,6 @@ const renderReceipt = () => {
 ${orderedItems.map(item => 
 `- ${item.name} (${item.selectedFlavor}) × ${item.quantity || 1} = ${(item.price * (item.quantity || 1)).toLocaleString()}₸`
 ).join('\n')}
-
-💰 *Итого к оплате: ${totalPrice.toLocaleString()}₸*
-    `.trim();
 
     // Кодируем сообщение для URL
     const encodedMessage = encodeURIComponent(messageForManager);
