@@ -211,28 +211,48 @@ export default function DymokApp() {
   // В функции renderReceipt заменим текущую ссылку на менеджера:
 const renderReceipt = () => {
     const orderedItems = [...cart];
-    const totalPrice = orderedItems.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
     
     // Формируем текст сообщения для менеджера
     const messageForManager = `
-🛒 *Новый заказ #${orderNumber}*
+🛒 Заказ #${orderNumber}
 
-📞 Телефон: ${contactPhone || 'Не указан'}
-📍 Адрес: ${deliveryAddress || 'Не указан'}
-🚚 Зона доставки: ${deliveryArea === 'square' ? 'В квадрате (1500₸)' : 'По городу (2500₸)'}
+📞 ${contactPhone}
+📍 ${deliveryAddress}
+🚚 ${deliveryArea === 'square' ? 'В квадрате' : 'По городу'}
 
-📦 *Товары:*
 ${orderedItems.map(item => 
-`- ${item.name} (${item.selectedFlavor}) × ${item.quantity || 1} = ${(item.price * (item.quantity || 1)).toLocaleString()}₸`
+`- ${item.name} (${item.selectedFlavor}) × ${item.quantity || 1}`
 ).join('\n')}
+    `.trim();
 
     // Кодируем сообщение для URL
     const encodedMessage = encodeURIComponent(messageForManager);
     
     return (
         <div className="bg-gray-800 rounded-xl p-5 border border-gray-700 mb-6">
-            {/* ... остальной код ... */}
-            
+            <div className="flex items-center justify-center mb-4">
+                <CheckCircle className="text-green-500 mr-2" size={24} />
+                <h3 className="text-xl font-bold">
+                    Ваш заказ #{orderNumber} оформлен!
+                </h3>
+            </div>
+
+            <div className="mb-6">
+                <div className="flex justify-between py-2 border-b border-gray-700">
+                    <span className="text-gray-400">Дата:</span>
+                    <span>{new Date().toLocaleString()}</span>
+                </div>
+
+                <h4 className="font-medium mt-4 mb-2">Товары:</h4>
+                {orderedItems.map(item => (
+                    <div key={`${item.id}-${item.selectedFlavor}`} className="flex justify-between py-2">
+                        <span>
+                            {item.name} ({item.selectedFlavor}) × {item.quantity || 1}
+                        </span>
+                    </div>
+                ))}
+            </div>
+
             <div className="mt-6">
                 <Button
                     asChild
@@ -242,10 +262,17 @@ ${orderedItems.map(item =>
                         href={`${managerLink}?text=${encodedMessage}`} 
                         target="_blank" 
                         rel="noopener noreferrer"
+                        onClick={() => {
+                            setCart([]);
+                            localStorage.removeItem('cart');
+                        }}
                     >
                         Связаться с менеджером
                     </a>
                 </Button>
+                <p className="text-sm text-gray-400 mt-2 text-center">
+                    Отправьте менеджеру скриншот оплаты
+                </p>
             </div>
         </div>
     );
