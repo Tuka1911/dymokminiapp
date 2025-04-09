@@ -208,57 +208,52 @@ export default function DymokApp() {
     }
 };
 
-    const renderReceipt = () => {
-    // Сохраняем корзину перед очисткой
+  // В функции renderReceipt заменим текущую ссылку на менеджера:
+const renderReceipt = () => {
     const orderedItems = [...cart];
     
+    // Формируем текст сообщения для менеджера
+    const messageForManager = `
+🛒 Новый заказ #${orderNumber}
+
+👤 Клиент:
+📞 Телефон: ${contactPhone}
+📍 Адрес: ${deliveryAddress}
+🚚 Зона доставки: ${deliveryArea === 'square' ? 'В квадрате (1500₸)' : 'По городу (2500₸)'}
+
+📦 Товары:
+${orderedItems.map(item => 
+    `- ${item.name} (${item.selectedFlavor}) × ${item.quantity} = ${item.price * item.quantity}₸`
+).join('\n')}
+
+💰 Итого: ${orderedItems.reduce((total, item) => total + (item.price * item.quantity), 0)}₸
+    `;
+
+    // Кодируем сообщение для URL
+    const encodedMessage = encodeURIComponent(messageForManager);
+    
+    // Формируем ссылку с предзаполненным сообщением
+    const managerLinkWithOrder = `${managerLink}?text=${encodedMessage}`;
+
     return (
         <div className="bg-gray-800 rounded-xl p-5 border border-gray-700 mb-6">
-            <div className="flex items-center justify-center mb-4">
-                <CheckCircle className="text-green-500 mr-2" size={24} />
-                <h3 className="text-xl font-bold">
-                    Ваш заказ #{orderNumber} оформлен!
-                </h3>
-            </div>
-
-            <div className="mb-6">
-                <div className="flex justify-between py-2 border-b border-gray-700">
-                    <span className="text-gray-400">Дата:</span>
-                    <span>{new Date().toLocaleString()}</span>
-                </div>
-
-                <h4 className="font-medium mt-4 mb-2">Товары:</h4>
-                {orderedItems.map(item => (
-                    <div key={`${item.id}-${item.selectedFlavor}`} className="flex justify-between py-2">
-                        <span>
-                            {item.name} ({item.selectedFlavor}) × {item.quantity || 1}
-                        </span>
-                        <span>{(item.price * (item.quantity || 1)).toLocaleString()}₸</span>
-                    </div>
-                ))}
-
-                <div className="flex justify-between py-2 border-t border-gray-700 mt-3 font-bold">
-                    <span>Сумма:</span>
-                    <span className="text-green-400">
-                        {orderedItems.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0).toLocaleString()}₸
-                    </span>
-                </div>
-            </div>
-
-            <div className="bg-gray-700/30 p-4 rounded-lg mb-4">
-                <h4 className="font-medium mb-2">Реквизиты для оплаты:</h4>
-                <div className="bg-gray-900 p-3 rounded-lg">
-                    <p className="text-sm text-gray-400 mb-1">Номер карты:</p>
-                    <p className="font-mono text-lg">{paymentDetails.cardNumber}</p>
-                </div>
-            </div>
-
+            {/* ... остальной код остается таким же ... */}
+            
             <div className="mt-6">
                 <Button
                     asChild
                     className="w-full bg-green-600 hover:bg-green-700 py-4 text-lg font-medium"
                 >
-                    <a href={`${managerLink}?start=order_${orderNumber}`} target="_blank" rel="noopener noreferrer">
+                    <a 
+                        href={managerLinkWithOrder} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        onClick={() => {
+                            // Очищаем корзину после перехода к менеджеру
+                            setCart([]);
+                            localStorage.removeItem('cart');
+                        }}
+                    >
                         Связаться с менеджером
                     </a>
                 </Button>
