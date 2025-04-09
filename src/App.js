@@ -212,22 +212,25 @@ export default function DymokApp() {
 const renderReceipt = () => {
     const orderedItems = [...cart];
     
+    // Формируем список товаров только если они есть
+    const productsList = orderedItems.length > 0 
+        ? `📦 Товары:\n${orderedItems.map(item => 
+            `- ${item.name} (${item.selectedFlavor}) × ${item.quantity || 1} = ${item.price * (item.quantity || 1)}₸`
+          ).join('\n')}`
+        : '';
+
     // Формируем текст сообщения для менеджера
     const messageForManager = `
 🛒 Новый заказ #${orderNumber}
 
-👤 Клиент:
-📞 Телефон: ${contactPhone}
-📍 Адрес: ${deliveryAddress}
-🚚 Зона доставки: ${deliveryArea === 'square' ? 'В квадрате (1500₸)' : 'По городу (2500₸)'}
+${contactPhone ? `📞 Телефон: ${contactPhone}\n` : ''}
+${deliveryAddress ? `📍 Адрес: ${deliveryAddress}\n` : ''}
+${deliveryArea ? `🚚 Зона доставки: ${deliveryArea === 'square' ? 'В квадрате (1500₸)' : 'По городу (2500₸)'}\n` : ''}
 
-📦 Товары:
-${orderedItems.map(item => 
-    `- ${item.name} (${item.selectedFlavor}) × ${item.quantity} = ${item.price * item.quantity}₸`
-).join('\n')}
+${productsList}
 
-💰 Итого: ${orderedItems.reduce((total, item) => total + (item.price * item.quantity), 0)}₸
-    `;
+💰 Итого: ${orderedItems.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0)}₸
+    `.trim();
 
     // Кодируем сообщение для URL
     const encodedMessage = encodeURIComponent(messageForManager);
