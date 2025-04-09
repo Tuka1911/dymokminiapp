@@ -195,8 +195,6 @@ export default function DymokApp() {
         });
 
         receipt += `\nИтого: ${getTotalPrice().toLocaleString()}₸\n\n`;
-        receipt += `Реквизиты для оплаты:\n`;
-        receipt += `Номер карты: ${paymentDetails.cardNumber}\n\n`;
         receipt += `После оплаты отправьте менеджеру скриншот чека и номер заказа\n`;
         receipt += `Ссылка на менеджера: ${managerLink}`;
 
